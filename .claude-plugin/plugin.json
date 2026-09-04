@@ -1,0 +1,7 @@
+{
+  "name": "loom",
+  "version": "0.1.0",
+  "description": "Generate Codex, Devin and opencode adapter configs from one canonical Claude Code config, with a drift gate and a capability-gap ledger.",
+  "author": { "name": "Rijo John" },
+  "keywords": ["mcp", "codex", "devin", "opencode", "claude-code", "harness", "config"]
+}

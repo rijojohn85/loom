@@ -1,0 +1,43 @@
+{
+  "_comment": "loom configuration. Copy to loom.config.json next to loom.sh (or pass --config). Paths are relative to paths.repo_root, which defaults to the git top level of this file's directory.",
+
+  "paths": {
+    "repo_root": "",
+    "mcp_json": ".mcp.json",
+    "claude_settings": ".claude/settings.json",
+    "canonical_context": "AGENTS.md",
+    "mcp_allowlist": "",
+    "spec_packs": "",
+    "gaps_file": "",
+    "loom_script": "",
+    "loom_config": ""
+  },
+
+  "_paths_help": {
+    "mcp_allowlist": "Optional markdown file with a '## Approved servers' table (name | endpoint | ...). When set, loom refuses to run if any canonical server or endpoint is not in it.",
+    "spec_packs": "Optional directory of dated spec packs (harness-specs/). Enables the staleness warning and defaults gaps_file to <spec_packs>/GAPS.md.",
+    "gaps_file": "Where the generated capability-gap ledger goes. Empty and no spec_packs: gaps are printed to stderr instead.",
+    "loom_script": "How generated headers refer to the script, e.g. 'agent/tools/loom.sh'. Defaults to the script's path relative to repo_root.",
+    "loom_config": "How generated headers refer to this file. Defaults to its path relative to repo_root."
+  },
+
+  "spec_pack_max_age_days": 30,
+
+  "mcp_note": "",
+  "_mcp_note_help": "Optional free text written as a comment into adapters that allow comments (Codex). Use it for the policy sentence your reviewers expect to see, e.g. 'All listed servers are read-only documentation services; tool calls are pre-approved per the allowlist.'",
+
+  "compensating_controls": {
+    "hooks": "git pre-commit hooks + CI running the same scripts",
+    "permissions": "manual approval inside the harness session"
+  },
+
+  "mcp_overrides": {
+    "devin": {
+      "_example-server-name": {
+        "command": "npx",
+        "args": ["-y", "mcp-remote@0.8.3", "{{url}}"]
+      }
+    }
+  },
+  "_mcp_overrides_help": "Per-harness transport overrides keyed by server name. Devin's HTTP client fails on servers that reject its discovery GET; route those through a pinned stdio bridge. '{{url}}' is replaced with the canonical endpoint. Remove the _example entry."
+}
