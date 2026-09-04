@@ -214,6 +214,14 @@ re-installing preserves config.
 - The allowlist gate parses a markdown table: server name in the first
   column, endpoint in the second, under a `## Approved servers` heading.
 
+## License
+
+Loom is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+You may use, study, modify, and redistribute it freely — but any derivative
+work, including one offered as a network service, must also be released under
+the AGPL-3.0 with its source. If your organization needs a non-AGPL commercial
+license, open an issue to discuss it.
+
 ## Origin
 
 Extracted from the `sre-stack` repository, where it keeps four harnesses
