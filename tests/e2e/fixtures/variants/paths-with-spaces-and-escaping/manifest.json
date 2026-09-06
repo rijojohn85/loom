@@ -1,0 +1,9 @@
+{
+  "name": "paths-with-spaces-and-escaping",
+  "description": "Hook command with spaces and quotes: adapters must round-trip it byte-exactly (escaping check).",
+  "changes": ["single PreToolUse hook whose command contains spaces and double quotes"],
+  "expected_generation": "success",
+  "expected_reason_pattern": "",
+  "expected_hook_command": "$CLAUDE_PROJECT_DIR/hooks/my hook.sh --msg \"hello world\"",
+  "loom_config_patch": null
+}

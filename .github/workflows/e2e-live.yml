@@ -1,0 +1,38 @@
+name: e2e-live
+
+# Opt-in, credentialed full run. Never gates pull requests: absence of
+# credentials surfaces as blocked (exit 3), never as a pass.
+on:
+  workflow_dispatch:
+    inputs:
+      suites:
+        description: "Suites to run (default: --full)"
+        default: "--full"
+        required: false
+
+jobs:
+  full:
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned harness CLIs
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.263
+          npm install -g @openai/codex@0.153.4
+          curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.29
+      - name: Bootstrap schema validator
+        run: tests/e2e/run.sh --bootstrap
+      - name: Full end-to-end run
+        run: tests/e2e/run.sh ${{ inputs.suites }} --keep-on-failure
+      - name: Upload results always
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-live-results
+          path: tests/e2e/results/

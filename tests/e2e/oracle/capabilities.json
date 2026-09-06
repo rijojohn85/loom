@@ -1,0 +1,280 @@
+{
+  "inventory_version": "1.0.0",
+  "claude_code_version": "2.1.263",
+  "generated_by": "hand-authored",
+  "capabilities": [
+    {
+      "id": "mcp.http.docs-a",
+      "kind": "mcp",
+      "source": {"file": ".mcp.json", "pointer": "/mcpServers/docs-a"},
+      "intent": "Docs server A is reachable over HTTP at its allowlisted endpoint",
+      "expectations": {
+        "codex": {"state": "preserved", "artifact": ".codex/config.toml", "assertion": "expect-codex-mcp-present"},
+        "opencode": {"state": "preserved", "artifact": "opencode.json", "assertion": "expect-opencode-mcp-present"},
+        "devin": {"state": "preserved", "artifact": ".devin/mcp_config.json", "assertion": "expect-devin-mcp-present"}
+      },
+      "scenarios": ["permitted-call"],
+      "evidence_required": ["harness-loader-probe", "official-schema", "local-structural"]
+    },
+    {
+      "id": "mcp.http.docs-b",
+      "kind": "mcp",
+      "source": {"file": ".mcp.json", "pointer": "/mcpServers/docs-b"},
+      "intent": "Docs server B is reachable over HTTP at its allowlisted endpoint",
+      "expectations": {
+        "codex": {"state": "preserved", "artifact": ".codex/config.toml", "assertion": "expect-codex-mcp-present"},
+        "opencode": {"state": "preserved", "artifact": "opencode.json", "assertion": "expect-opencode-mcp-present"},
+        "devin": {"state": "preserved", "artifact": ".devin/mcp_config.json", "assertion": "expect-devin-mcp-present"}
+      },
+      "scenarios": ["permitted-call"],
+      "evidence_required": ["harness-loader-probe", "official-schema", "local-structural"]
+    },
+    {
+      "id": "mcp.stdio.docs-local",
+      "kind": "mcp",
+      "source": {"file": ".mcp.json", "pointer": "/mcpServers/docs-local"},
+      "intent": "Local docs server is reachable over stdio with its declared command",
+      "expectations": {
+        "codex": {"state": "preserved", "artifact": ".codex/config.toml", "assertion": "expect-codex-mcp-present"},
+        "opencode": {"state": "preserved", "artifact": "opencode.json", "assertion": "expect-opencode-mcp-present"},
+        "devin": {"state": "preserved", "artifact": ".devin/mcp_config.json", "assertion": "expect-devin-mcp-present"}
+      },
+      "scenarios": ["permitted-call"],
+      "evidence_required": ["harness-loader-probe", "official-schema", "local-structural"]
+    },
+    {
+      "id": "perm.allow.lint",
+      "kind": "permission",
+      "source": {"file": ".claude/settings.json", "pointer": "/permissions/allow/0"},
+      "intent": "Running make lint needs no approval",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.allow-lint", "native_equivalent": {"exists": false, "evidence": "codex has no permission mechanism; approval is manual in-session"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.allow-lint", "native_equivalent": {"exists": false, "evidence": "opencode.json carries no permission config"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.devin.allow-lint", "native_equivalent": {"exists": false, "evidence": ".devin/config.json carries MCP allows only"}}
+      },
+      "scenarios": ["permitted-call"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "perm.allow.mcp-tools",
+      "kind": "permission",
+      "source": {"file": ".claude/settings.json", "pointer": "/permissions/allow"},
+      "intent": "Pre-approved docs MCP tools stay callable without a prompt",
+      "expectations": {
+        "codex": {"state": "compensated", "gap_id": "gap.codex.allow-mcp", "note": "default_tools_approval_mode=auto per emitted server"},
+        "opencode": {"state": "compensated", "gap_id": "gap.opencode.allow-mcp", "note": "emitted server entries grant tool access"},
+        "devin": {"state": "preserved", "artifact": ".devin/config.json", "assertion": "expect-devin-mcp-permissions"}
+      },
+      "scenarios": ["permitted-call"],
+      "evidence_required": ["harness-loader-probe", "official-schema", "local-structural"]
+    },
+    {
+      "id": "perm.deny.rm-rf",
+      "kind": "permission",
+      "source": {"file": ".claude/settings.json", "pointer": "/permissions/deny/0"},
+      "intent": "Recursive forced deletion is never executed",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.deny-rmrf", "native_equivalent": {"exists": false, "evidence": "codex has no permission mechanism; relies on sandbox + manual approval"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.deny-rmrf", "native_equivalent": {"exists": false, "evidence": "opencode.json carries no permission config"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.devin.deny-rmrf", "native_equivalent": {"exists": false, "evidence": ".devin/config.json carries MCP allows only"}}
+      },
+      "scenarios": ["forbidden-action"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "perm.deny.read-env",
+      "kind": "permission",
+      "source": {"file": ".claude/settings.json", "pointer": "/permissions/deny/1"},
+      "intent": "The secrets file ./.env is never read (path-scoped rule)",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.deny-readenv", "native_equivalent": {"exists": false, "evidence": "codex has no permission mechanism; relies on sandbox + manual approval"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.deny-readenv", "native_equivalent": {"exists": false, "evidence": "opencode.json carries no permission config"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.devin.deny-readenv", "native_equivalent": {"exists": false, "evidence": ".devin/config.json carries MCP allows only"}}
+      },
+      "scenarios": ["protected-file"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "perm.ask.git-push",
+      "kind": "permission",
+      "source": {"file": ".claude/settings.json", "pointer": "/permissions/ask/0"},
+      "intent": "Pushing never happens without an explicit approval",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.ask-push", "native_equivalent": {"exists": false, "evidence": "codex has no approval-requirement mechanism"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.ask-push", "native_equivalent": {"exists": false, "evidence": "opencode.json carries no permission config"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.devin.ask-push", "native_equivalent": {"exists": false, "evidence": ".devin/config.json carries MCP allows only"}}
+      },
+      "scenarios": ["approval-required"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "perm.default-mode",
+      "kind": "permission",
+      "source": {"file": ".claude/settings.json", "pointer": "/permissions/defaultMode"},
+      "intent": "Edits are accepted without per-edit prompting",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.default-mode", "native_equivalent": {"exists": false, "evidence": "codex has no default-mode setting"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.default-mode", "native_equivalent": {"exists": false, "evidence": "opencode.json carries no permission config"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.devin.default-mode", "native_equivalent": {"exists": false, "evidence": ".devin/config.json carries MCP allows only"}}
+      },
+      "scenarios": ["permitted-call"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "hook.pre.write-order",
+      "kind": "hook",
+      "source": {"file": ".claude/settings.json", "pointer": "/hooks/PreToolUse"},
+      "intent": "Both pre-write gates run, in declared order, on every file write",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.hooks-pre", "native_equivalent": {"exists": false, "evidence": "codex has no hook mechanism"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.hooks-pre", "native_equivalent": {"exists": false, "evidence": "opencode has no hook mechanism"}},
+        "devin": {"state": "preserved", "artifact": ".devin/hooks.v1.json", "assertion": "expect-devin-hooks-order"}
+      },
+      "scenarios": ["hook-order"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "hook.post.write",
+      "kind": "hook",
+      "source": {"file": ".claude/settings.json", "pointer": "/hooks/PostToolUse"},
+      "intent": "The post-write hook runs after a file write",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.hooks-post", "native_equivalent": {"exists": false, "evidence": "codex has no hook mechanism"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.hooks-post", "native_equivalent": {"exists": false, "evidence": "opencode has no hook mechanism"}},
+        "devin": {"state": "preserved", "artifact": ".devin/hooks.v1.json", "assertion": "expect-devin-hooks-present"}
+      },
+      "scenarios": ["hook-order"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "hook.stop",
+      "kind": "hook",
+      "source": {"file": ".claude/settings.json", "pointer": "/hooks/Stop"},
+      "intent": "The stop hook runs at session end",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.codex.hooks-stop", "native_equivalent": {"exists": false, "evidence": "codex has no hook mechanism"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.opencode.hooks-stop", "native_equivalent": {"exists": false, "evidence": "opencode has no hook mechanism"}},
+        "devin": {"state": "preserved", "artifact": ".devin/hooks.v1.json", "assertion": "expect-devin-hooks-present"}
+      },
+      "scenarios": ["hook-order"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "context.claude-import",
+      "kind": "context",
+      "source": {"file": "CLAUDE.md", "pointer": "@AGENTS.md import"},
+      "intent": "Project context from AGENTS.md reaches the agent session",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.ctx.import.codex", "native_equivalent": {"exists": false, "evidence": "no adapter carries project context; tracked by feature 002-link-context-assets"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.ctx.import.opencode", "native_equivalent": {"exists": false, "evidence": "no adapter carries project context; tracked by feature 002-link-context-assets"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.ctx.import.devin", "native_equivalent": {"exists": false, "evidence": "no adapter carries project context; tracked by feature 002-link-context-assets"}}
+      },
+      "scenarios": ["context-influence"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "context.agents-relationships",
+      "kind": "context",
+      "source": {"file": "AGENTS.md", "pointer": "Relationships section"},
+      "intent": "File relationships declared in AGENTS.md guide agent behaviour",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.ctx.relationships.codex", "native_equivalent": {"exists": false, "evidence": "no adapter carries project context; tracked by feature 002-link-context-assets"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.ctx.relationships.opencode", "native_equivalent": {"exists": false, "evidence": "no adapter carries project context; tracked by feature 002-link-context-assets"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.ctx.relationships.devin", "native_equivalent": {"exists": false, "evidence": "no adapter carries project context; tracked by feature 002-link-context-assets"}}
+      },
+      "scenarios": ["context-influence"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "skill.lint-review",
+      "kind": "skill",
+      "source": {"file": ".claude/skills/lint-review/SKILL.md", "pointer": "frontmatter name"},
+      "intent": "The lint-review skill is discoverable with its checklist and helper",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.skill.lint-review.codex", "native_equivalent": {"exists": false, "evidence": "skills are untranslated markdown assets; tracked by feature 002-link-context-assets"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.skill.lint-review.opencode", "native_equivalent": {"exists": true, "evidence": "opencode debug skill lists lint-review natively (backlog marker for 002-link-context-assets)"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.skill.lint-review.devin", "native_equivalent": {"exists": false, "evidence": "skills are untranslated markdown assets; tracked by feature 002-link-context-assets"}}
+      },
+      "scenarios": ["context-influence"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "skill.docs-sync",
+      "kind": "skill",
+      "source": {"file": ".claude/skills/docs-sync/SKILL.md", "pointer": "frontmatter name"},
+      "intent": "The docs-sync skill is discoverable with its template",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.skill.docs-sync.codex", "native_equivalent": {"exists": false, "evidence": "skills are untranslated markdown assets; tracked by feature 002-link-context-assets"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.skill.docs-sync.opencode", "native_equivalent": {"exists": true, "evidence": "opencode debug skill lists docs-sync natively (backlog marker for 002-link-context-assets)"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.skill.docs-sync.devin", "native_equivalent": {"exists": false, "evidence": "skills are untranslated markdown assets; tracked by feature 002-link-context-assets"}}
+      },
+      "scenarios": ["context-influence"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "agent.planner",
+      "kind": "agent",
+      "source": {"file": ".claude/agents/planner.md", "pointer": "frontmatter name"},
+      "intent": "The planner subagent is available with its tool scope",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.agent.planner.codex", "native_equivalent": {"exists": false, "evidence": "agents are untranslated markdown assets; tracked by feature 002-link-context-assets"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.agent.planner.opencode", "native_equivalent": {"exists": false, "evidence": "agents are untranslated markdown assets; tracked by feature 002-link-context-assets"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.agent.planner.devin", "native_equivalent": {"exists": false, "evidence": "agents are untranslated markdown assets; tracked by feature 002-link-context-assets"}}
+      },
+      "scenarios": ["context-influence"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "agent.reviewer",
+      "kind": "agent",
+      "source": {"file": ".claude/agents/reviewer.md", "pointer": "frontmatter name"},
+      "intent": "The reviewer subagent is available with its tool scope",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.agent.reviewer.codex", "native_equivalent": {"exists": false, "evidence": "agents are untranslated markdown assets; tracked by feature 002-link-context-assets"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.agent.reviewer.opencode", "native_equivalent": {"exists": false, "evidence": "agents are untranslated markdown assets; tracked by feature 002-link-context-assets"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.agent.reviewer.devin", "native_equivalent": {"exists": false, "evidence": "agents are untranslated markdown assets; tracked by feature 002-link-context-assets"}}
+      },
+      "scenarios": ["context-influence"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "rule.hook-matcher-scope",
+      "kind": "rule",
+      "source": {"file": ".claude/settings.json", "pointer": "/hooks/*/matcher"},
+      "intent": "Hook matchers scope execution to file writes only",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.rule.matcher.codex", "native_equivalent": {"exists": false, "evidence": "codex drops hooks including their matchers"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.rule.matcher.opencode", "native_equivalent": {"exists": false, "evidence": "opencode drops hooks including their matchers"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.rule.matcher.devin", "native_equivalent": {"exists": false, "evidence": ".devin/hooks.v1.json carries empty matchers; scoping is lost"}}
+      },
+      "scenarios": ["hook-order"],
+      "evidence_required": ["local-structural"]
+    },
+    {
+      "id": "policy.mcp-allowlist",
+      "kind": "policy",
+      "source": {"file": "agent/policies/allowed-mcp-servers.md", "pointer": "Approved servers table"},
+      "intent": "Only allowlisted servers at allowlisted endpoints can generate adapters",
+      "expectations": {
+        "codex": {"state": "preserved", "artifact": ".codex/config.toml", "assertion": "expect-allowlist-enforced"},
+        "opencode": {"state": "preserved", "artifact": "opencode.json", "assertion": "expect-allowlist-enforced"},
+        "devin": {"state": "preserved", "artifact": ".devin/mcp_config.json", "assertion": "expect-allowlist-enforced"}
+      },
+      "scenarios": ["permitted-call", "forbidden-action"],
+      "evidence_required": ["behaviour-probe"]
+    },
+    {
+      "id": "policy.data-handling",
+      "kind": "policy",
+      "source": {"file": "agent/policies/data-handling.md", "pointer": "full document"},
+      "intent": "Secret-handling rules constrain agent behaviour",
+      "expectations": {
+        "codex": {"state": "approved-gap", "gap_id": "gap.policy.data.codex", "native_equivalent": {"exists": false, "evidence": "policy prose is not carried into any adapter"}},
+        "opencode": {"state": "approved-gap", "gap_id": "gap.policy.data.opencode", "native_equivalent": {"exists": false, "evidence": "policy prose is not carried into any adapter"}},
+        "devin": {"state": "approved-gap", "gap_id": "gap.policy.data.devin", "native_equivalent": {"exists": false, "evidence": "policy prose is not carried into any adapter"}}
+      },
+      "scenarios": ["protected-file", "approval-required"],
+      "evidence_required": ["local-structural"]
+    }
+  ]
+}

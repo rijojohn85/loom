@@ -1,0 +1,10 @@
+{
+  "id": "expect-claude-baseline-present",
+  "artifact": ".mcp.json",
+  "note": "Source-baseline assertions for intent scenarios: the canonical fixture the baseline runs against.",
+  "required_content": [
+    {"pointer": "/mcpServers/docs-a/url", "value": "{{MCP_URL_A}}"},
+    {"pointer": "/mcpServers/docs-b/url", "value": "{{MCP_URL_B}}"}
+  ],
+  "forbidden_content": ["{{MCP_HTTP_URL_A}}", "{{MCP_HTTP_URL_B}}"]
+}

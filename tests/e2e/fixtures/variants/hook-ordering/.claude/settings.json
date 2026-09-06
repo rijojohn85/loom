@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": ["Bash(make lint)"],
+    "deny": ["Bash(rm -rf /)"],
+    "ask": [],
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/pre-write-check.sh" },
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/pre-write.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/post-write.sh" }
+        ]
+      }
+    ]
+  }
+}

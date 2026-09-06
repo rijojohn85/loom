@@ -1,0 +1,6 @@
+{
+  "id": "expect-allowlist-enforced",
+  "artifact": "agent/tools/loom.config.json",
+  "note": "The allowlist gate is enforced by generation refusal, proven by the negative-variant checks (offline.negative.*). This expectation binds the capability to those checks.",
+  "proven_by_checks": ["offline.negative.url-less", "offline.negative.unapproved-name", "offline.negative.unapproved-endpoint", "offline.negative.invalid-input"]
+}

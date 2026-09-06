@@ -1,0 +1,8 @@
+{
+  "name": "empty-configuration",
+  "description": "No servers, no permissions, no hooks: generation must succeed with empty but valid adapters.",
+  "changes": ["empties .mcp.json servers, permissions and hooks; empties the allowlist table"],
+  "expected_generation": "success",
+  "expected_reason_pattern": "",
+  "loom_config_patch": null
+}

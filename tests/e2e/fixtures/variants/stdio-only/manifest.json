@@ -1,0 +1,8 @@
+{
+  "name": "stdio-only",
+  "description": "Only the stdio server: proves the url-annotated stdio entry generates adapters.",
+  "changes": ["removes docs-a and docs-b from .mcp.json and the allowlist"],
+  "expected_generation": "success",
+  "expected_reason_pattern": "",
+  "loom_config_patch": null
+}

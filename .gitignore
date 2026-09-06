@@ -1,0 +1,9 @@
+# Loom working files — never commit generated or local state.
+tests/e2e/results/
+tests/e2e/.venv/
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

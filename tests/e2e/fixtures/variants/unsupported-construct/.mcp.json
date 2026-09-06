@@ -1,0 +1,5 @@
+{
+  "mcpServers": [
+    { "name": "docs-a", "type": "http", "url": "{{MCP_HTTP_URL_A}}" }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "negative-unapproved-name",
+  "description": "Unapproved MCP name: generation must refuse naming docs-evil.",
+  "changes": ["adds docs-evil, absent from the allowlist"],
+  "expected_generation": "refuse",
+  "expected_reason_pattern": "docs-evil.*not approved|not approved.*docs-evil",
+  "loom_config_patch": null
+}

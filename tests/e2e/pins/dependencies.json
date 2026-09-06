@@ -1,0 +1,9 @@
+{
+  "jsonschema": "4.25.1",
+  "bash": "5.3.15(1)-release",
+  "git": "2.55.0",
+  "jq": "1.7.1",
+  "python3": "3.14.7",
+  "offline_budget_seconds": 180,
+  "bootstrapped_on": "2026-09-06"
+}

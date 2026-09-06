@@ -1,0 +1,13 @@
+One harness spec pack in this project is stale.
+
+A file under agent/harness-specs/ carries a generated date older than the
+spec_pack_max_age_days configured in agent/tools/loom.config.json. Follow the
+loom skill's Phase A refresh workflow (.claude/skills/loom/SKILL.md): report
+the staleness warning the generator prints, what you refreshed, and the
+resulting diff with your justification.
+
+Rules:
+- You may refresh the stale spec pack and regenerate adapters with
+  agent/tools/loom.sh. Nothing else may be edited by hand.
+- Quote the staleness warning line exactly.
+- Keep the response short.

@@ -1,0 +1,14 @@
+{
+  "id": "expect-gaps-ledger",
+  "artifact": "agent/harness-specs/GAPS.md",
+  "required_rows": [
+    "| codex | permission allow: Bash(make lint) |",
+    "| codex | hook event: PreToolUse |",
+    "| codex | hook event: PostToolUse |",
+    "| codex | hook event: Stop |",
+    "| devin | permission deny: Bash(rm -rf /) |",
+    "| opencode | permission deny: Bash(rm -rf /) |",
+    "| opencode | hook event: PreToolUse |"
+  ],
+  "forbidden_rows": ["| codex | permission allow: WRONG |"]
+}

@@ -24,8 +24,10 @@
 #                    {command, args} stdio bridge ("{{url}}" is substituted),
 #                    the rest connect natively over HTTP
 #   config.json      permissions.allow, mcp__<server>__* entries only
-#   hooks.v1.json    the canonical Claude hooks, $CLAUDE_PROJECT_DIR rewritten
-#                    to $DEVIN_PROJECT_DIR, empty matcher, 30s timeout
+#   hooks.v1.json    the canonical Claude hooks, every command in a matcher
+#                    group carried, $CLAUDE_PROJECT_DIR rewritten to
+#                    $DEVIN_PROJECT_DIR at every occurrence, empty matcher,
+#                    30s timeout
 
 emit_devin() {
   local ir="$1" out="$2"
@@ -48,21 +50,31 @@ emit_devin() {
 
   jq -n \
     --slurpfile ir "${ir}" \
-    --arg src "source: .claude/settings.json" \
+    --arg src "source: $(jq -r '.meta.claude_settings' "${ir}")" \
     '{ "_generated_by": ("loom — do not edit by hand; " + $src),
        permissions: {
          allow: [($ir[0].permissions.allow // [])[] | select(startswith("mcp__"))]
        } }' "${ir}" > "${dir}/config.json"
 
-  local pcontrol
+  # Devin carries only allow entries in mcp__<server>__* form; every other
+  # canonical permissions node (non-MCP allow entries, deny, ask, defaultMode)
+  # becomes a GAPS row rather than silent loss.
+  local pcontrol kind entry
   pcontrol="$(jq -r '.meta.permission_gap_control | .devin // .default' "${ir}")"
-  while IFS= read -r entry; do
-    [[ -n "${entry}" ]] && gap_add devin "permission allow: ${entry}" "${pcontrol}"
-  done < <(jq -r '(.permissions.allow // [])[] | select(startswith("mcp__") | not)' "${ir}")
+  while IFS=$'\t' read -r kind entry; do
+    [[ -n "${kind}" ]] && gap_add devin "permission ${kind}: ${entry}" "${pcontrol}"
+  done < <(jq -r '
+    (.permissions // {}) as $p
+    | ([$p.allow[]? | select(startswith("mcp__") | not)] | map(["allow", .]))
+    + ([$p.deny[]?]  | map(["deny", .]))
+    + ([$p.ask[]?]   | map(["ask", .]))
+    + (if ($p.defaultMode // null) == null then [] else [["defaultMode", $p.defaultMode]] end)
+    | .[] | @tsv' "${ir}")
 
   # Every canonical hook event Devin supports is carried over verbatim
-  # (Devin: PreToolUse denies on exit 2, like Claude Code). Unsupported
-  # events become GAPS rows rather than silent loss.
+  # (Devin: PreToolUse denies on exit 2, like Claude Code). Every command in
+  # a matcher group is carried, and $CLAUDE_PROJECT_DIR is rewritten at every
+  # occurrence. Unsupported events become GAPS rows rather than silent loss.
   local devin_events="PreToolUse PostToolUse PermissionRequest UserPromptSubmit Stop PostCompaction SessionStart SessionEnd"
   local hcontrol
   hcontrol="$(jq -r '.meta.hook_gap_control | .devin // .default' "${ir}")"
@@ -75,15 +87,15 @@ emit_devin() {
 
   jq -n \
     --slurpfile ir "${ir}" \
-    --arg src "source: .claude/settings.json" \
+    --arg src "source: $(jq -r '.meta.claude_settings' "${ir}")" \
     --arg supported "${devin_events}" \
     '{ "_generated_by": ("loom — do not edit by hand; " + $src) }
      + ($ir[0].hooks
         | with_entries(select(.key as $k | ($supported | split(" ")) | index($k)))
         | with_entries(.value |= [ .[] | {
             matcher: "",
-            hooks: [{ type: "command",
-                      command: (.hooks[0].command | sub("\\$CLAUDE_PROJECT_DIR"; "$DEVIN_PROJECT_DIR")),
-                      timeout: 30 }]
-          } ]))' "${ir}" > "${dir}/hooks.v1.json"
+            hooks: [ .hooks[]? | {
+              type: "command",
+              command: ((.command // "") | gsub("\\$CLAUDE_PROJECT_DIR"; "$DEVIN_PROJECT_DIR")),
+              timeout: 30 } ] } ]))' "${ir}" > "${dir}/hooks.v1.json"
 }

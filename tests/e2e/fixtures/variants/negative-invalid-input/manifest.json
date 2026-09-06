@@ -1,0 +1,8 @@
+{
+  "name": "negative-invalid-input",
+  "description": "Invalid source input: generation must refuse on unparsable .mcp.json.",
+  "changes": ["replaces .mcp.json with syntactically invalid JSON"],
+  "expected_generation": "refuse",
+  "expected_reason_pattern": "not valid JSON",
+  "loom_config_patch": null
+}

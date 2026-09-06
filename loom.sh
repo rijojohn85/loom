@@ -22,7 +22,9 @@
 # harnesses (Codex, Devin, opencode, ...) deterministically: one input ->
 # byte-identical output, no network, no model. `--check` diffs regeneration
 # against the committed adapters and exits 1 on any drift, so adapters can
-# never be hand-edited without lint noticing.
+# never be hand-edited without lint noticing. When paths.manifest is
+# configured, --check also flags emitted files that regeneration no longer
+# produces (orphans).
 #
 # Anything a harness cannot express is written to GAPS.md with the
 # compensating control. Silent loss is the failure mode; gaps are loud.
@@ -86,10 +88,11 @@ collect_emitters() {
     name="$(basename "${f}" .sh)"
     name="${name#emit-}"
     if [[ ${#HARNESSES[@]} -eq 0 ]]; then
-      EMITTERS+=("${name}")
+      [[ " ${EMITTERS[*]:-} " == *" ${name} "* ]] || EMITTERS+=("${name}")
     else
       for h in "${HARNESSES[@]}"; do
-        [[ "${name}" == "${h}" ]] && EMITTERS+=("${name}")
+        [[ "${name}" == "${h}" ]] || continue
+        [[ " ${EMITTERS[*]:-} " == *" ${name} "* ]] || EMITTERS+=("${name}")
       done
     fi
   done
@@ -133,6 +136,7 @@ ALLOWLIST_REL="$(cfg '.paths.mcp_allowlist')"
 SPEC_PACKS_REL="$(cfg '.paths.spec_packs')"
 GAPS_REL="$(cfg '.paths.gaps_file')"
 [[ -z "${GAPS_REL}" && -n "${SPEC_PACKS_REL}" ]] && GAPS_REL="${SPEC_PACKS_REL}/GAPS.md"
+MANIFEST_REL="$(cfg '.paths.manifest')"
 MAX_AGE="$(cfg '.spec_pack_max_age_days')"; MAX_AGE="${MAX_AGE:-30}"
 
 # Display paths for generated headers ("edit X and rerun Y").
@@ -147,6 +151,21 @@ CONFIG_DISPLAY="${CONFIG_DISPLAY:-$(rel_to_root "${CONFIG}")}"
 
 [[ -f "${REPO_ROOT}/${MCP_JSON}" ]] || die "canonical MCP config not found: ${MCP_JSON}"
 [[ -f "${REPO_ROOT}/${CLAUDE_SETTINGS}" ]] || die "canonical Claude settings not found: ${CLAUDE_SETTINGS}"
+
+# Canonical inputs must parse and be in the shape loom supports. Fail loudly
+# here rather than emit a corrupt adapter or skip the policy gate silently.
+for canonical in "${REPO_ROOT}/${MCP_JSON}" "${REPO_ROOT}/${CLAUDE_SETTINGS}"; do
+  jq -e . "${canonical}" >/dev/null 2>&1 \
+    || die "not valid JSON: ${canonical#"${REPO_ROOT}"/}"
+done
+jq -e '.mcpServers | type == "object"' "${REPO_ROOT}/${MCP_JSON}" >/dev/null 2>&1 \
+  || die "no mcpServers object in ${MCP_JSON}"
+while IFS= read -r server; do
+  [[ -n "${server}" ]] || continue
+  die "MCP server '${server}' has no url in ${MCP_JSON} — loom supports url-based (http) servers only"
+done < <(jq -r '.mcpServers | to_entries[]
+  | select((.value.url | type) != "string" or .value.url == "") | .key' "${REPO_ROOT}/${MCP_JSON}")
+[[ -f "${REPO_ROOT}/${CONTEXT_FILE}" ]] || die "canonical context file not found: ${CONTEXT_FILE}"
 
 # ---------------------------------------------------------------- allowlist
 # Hard gate: every MCP server and endpoint in the canonical config must match
@@ -190,6 +209,7 @@ jq -n \
   --arg loom_script "${LOOM_SCRIPT_DISPLAY}" \
   --arg config_path "${CONFIG_DISPLAY}" \
   --arg mcp_json "${MCP_JSON}" \
+  --arg claude_settings "${CLAUDE_SETTINGS}" \
   --arg allowlist "${ALLOWLIST_REL}" \
   --arg context "${CONTEXT_FILE}" \
   '
@@ -204,14 +224,19 @@ jq -n \
       loom_script: $loom_script,
       config_path: $config_path,
       mcp_json: $mcp_json,
+      claude_settings: $claude_settings,
       allowlist: $allowlist,
       mcp_note: ($cfg[0].mcp_note // ""),
       hook_gap_control: (($cfg[0].compensating_controls.hooks
         // "git pre-commit hooks + CI running the same scripts")
-        | if type == "string" then {default: .} else . end),
+        | if type == "string" then {default: .} else . end
+        | if has("default") then .
+          else . + {default: "git pre-commit hooks + CI running the same scripts"} end),
       permission_gap_control: (($cfg[0].compensating_controls.permissions
         // "manual approval inside the harness session")
-        | if type == "string" then {default: .} else . end)
+        | if type == "string" then {default: .} else . end
+        | if has("default") then .
+          else . + {default: "manual approval inside the harness session"} end)
     }
   }' > "${IR}/ir.json"
 
@@ -238,8 +263,9 @@ GAPS
 fi
 
 gap_add() {
+  # Escape pipes so a dropped node mentioning one cannot corrupt the table.
   if [[ -n "${GAPS_FILE}" ]]; then
-    echo "| $1 | $2 | $3 |" >> "${GAPS_FILE}"
+    echo "| $1 | ${2//'|'/\\|} | ${3//'|'/\\|} |" >> "${GAPS_FILE}"
   else
     echo "loom: gap ($1): $2 — compensating control: $3" >&2
   fi
@@ -248,6 +274,21 @@ gap_add() {
 for h in "${EMITTERS[@]}"; do
   "emit_${h}" "${IR}/ir.json" "${OUT}"
 done
+
+# ---------------------------------------------------------------- manifest
+# Records exactly which files this full run emits. --check uses the committed
+# manifest to flag generated files that regeneration no longer produces
+# (orphans). Maintained on full runs only, like the gaps ledger.
+MANIFEST_FILE=""
+if [[ -n "${MANIFEST_REL}" && ${#HARNESSES[@]} -eq 0 ]]; then
+  MANIFEST_FILE="${OUT}/${MANIFEST_REL}"
+  mkdir -p "$(dirname "${MANIFEST_FILE}")"
+  {
+    echo "# generated by loom — do not edit by hand; checked by loom.sh --check"
+    (cd "${OUT}" && find . -type f -print) | sed 's|^\./||' \
+      | awk -v m="${MANIFEST_REL}" '$0 != m' | LC_ALL=C sort
+  } > "${MANIFEST_FILE}"
+fi
 
 # ---------------------------------------------------------------- spec-pack staleness
 # Warn, never fail — refreshing a pack is a judgment call (the loom skill).
@@ -259,7 +300,7 @@ epoch_of() {
 if [[ -n "${SPEC_PACKS_REL}" && -d "${REPO_ROOT}/${SPEC_PACKS_REL}" ]]; then
   for pack in "${REPO_ROOT}/${SPEC_PACKS_REL}"/*.md; do
     [[ -f "${pack}" ]] || continue
-    gen="$(sed -n 's/^generated: //p' "${pack}" | head -1)"
+    gen="$(awk '/^generated: /{ sub(/^generated: /, ""); print; exit }' "${pack}")"
     [[ -n "${gen}" ]] || continue
     gen_epoch="$(epoch_of "${gen}")"
     [[ -n "${gen_epoch}" ]] || continue
@@ -271,8 +312,25 @@ if [[ -n "${SPEC_PACKS_REL}" && -d "${REPO_ROOT}/${SPEC_PACKS_REL}" ]]; then
 fi
 
 # ---------------------------------------------------------------- apply / check
+# regen_manifest lists what this run emitted (same content as the generated
+# manifest file, without its header); used to detect orphans.
+regen_manifest() {
+  (cd "${OUT}" && find . -type f -print) | sed 's|^\./||' \
+    | awk -v m="${MANIFEST_REL}" '$0 != m' | LC_ALL=C sort > "${IR}/regen"
+}
+
 if [[ ${CHECK} -eq 1 ]]; then
   drift=0
+  if [[ -n "${MANIFEST_REL}" && ${#HARNESSES[@]} -eq 0 && -f "${REPO_ROOT}/${MANIFEST_REL}" ]]; then
+    regen_manifest
+    while IFS= read -r rel; do
+      [[ -z "${rel}" || "${rel}" == \#* ]] && continue
+      grep -Fxq -- "${rel}" "${IR}/regen" && continue
+      [[ -f "${REPO_ROOT}/${rel}" ]] || continue
+      echo "loom: ORPHAN (no longer regenerated, remove by hand): ${rel}"
+      drift=1
+    done < "${REPO_ROOT}/${MANIFEST_REL}"
+  fi
   while IFS= read -r -d '' f; do
     rel="${f#"${OUT}"/}"
     committed="${REPO_ROOT}/${rel}"
@@ -292,9 +350,21 @@ if [[ ${CHECK} -eq 1 ]]; then
   exit 0
 fi
 
+# Apply: warn (never delete) about committed generated files that this
+# regeneration no longer produces.
+if [[ -n "${MANIFEST_REL}" && ${#HARNESSES[@]} -eq 0 && -f "${REPO_ROOT}/${MANIFEST_REL}" ]]; then
+  regen_manifest
+  while IFS= read -r rel; do
+    [[ -z "${rel}" || "${rel}" == \#* ]] && continue
+    grep -Fxq -- "${rel}" "${IR}/regen" && continue
+    [[ -f "${REPO_ROOT}/${rel}" ]] \
+      && echo "loom: note: orphaned generated file (no longer regenerated, left in place): ${rel}" >&2
+  done < "${REPO_ROOT}/${MANIFEST_REL}"
+fi
+
 while IFS= read -r -d '' f; do
   rel="${f#"${OUT}"/}"
   mkdir -p "${REPO_ROOT}/$(dirname "${rel}")"
   cp "${f}" "${REPO_ROOT}/${rel}"
 done < <(find "${OUT}" -type f -print0)
-echo "loom: emitted ${#EMITTERS[@]} adapter set(s)${GAPS_FILE:+ + ${GAPS_REL}}"
+echo "loom: emitted ${#EMITTERS[@]} adapter set(s)${GAPS_FILE:+ + ${GAPS_REL}}${MANIFEST_FILE:+ + manifest}"

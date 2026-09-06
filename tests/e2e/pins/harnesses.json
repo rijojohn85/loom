@@ -1,0 +1,52 @@
+{
+  "harnesses": {
+    "claude": {
+      "version": "2.1.263",
+      "pinned_on": "2026-09-06",
+      "interfaces": [
+        "claude -p --output-format stream-json --include-partial-messages",
+        "claude --settings/--setting-sources",
+        "claude --mcp-config/--strict-mcp-config",
+        "claude --permission-mode/--permission-prompts none",
+        "claude --safe-mode",
+        "claude --add-dir/--session-id/--debug-file/--model",
+        "claude mcp list",
+        "$CLAUDE_CONFIG_DIR"
+      ]
+    },
+    "codex": {
+      "version": "0.153.4",
+      "pinned_on": "2026-09-06",
+      "interfaces": [
+        "codex --strict-config",
+        "codex exec --strict-config",
+        "codex doctor --json",
+        "codex mcp list",
+        "codex mcp get <name>",
+        "codex debug prompt-input",
+        "codex exec --json -C <dir> --sandbox read-only --output-last-message <file>",
+        "$CODEX_HOME"
+      ]
+    },
+    "opencode": {
+      "version": "1.18.29",
+      "pinned_on": "2026-09-06",
+      "interfaces": [
+        "opencode debug config",
+        "opencode debug paths",
+        "opencode mcp list",
+        "opencode debug skill",
+        "opencode agent list",
+        "opencode debug agent <name>",
+        "opencode run --format json --dir <dir> --port <n> --pure",
+        "$HOME/$XDG_CONFIG_HOME/$XDG_DATA_HOME/$XDG_CACHE_HOME"
+      ]
+    },
+    "devin": {
+      "version": null,
+      "pinned_on": "2026-09-06",
+      "interfaces": [],
+      "note": "deferred: no local CLI. Adapters validated structurally offline; live claims recorded unverified."
+    }
+  }
+}

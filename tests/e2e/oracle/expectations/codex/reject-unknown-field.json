@@ -1,0 +1,8 @@
+{
+  "id": "expect-codex-unknown-field-rejected",
+  "artifact": "$CODEX_HOME/config.toml (per-run isolated user config — never the developer's real config)",
+  "mechanism": "codex exec --strict-config",
+  "probe": "append __loom_unknown_field__ = true to the isolated user config, run codex exec --strict-config with stdin closed, and require a nonzero exit naming the field (observed form: config.toml:3:1: unknown configuration field)",
+  "observed": "2026-09-06 on codex 0.153.4: user-level unknown fields ARE rejected at loader startup, before any model or auth step (no spend). PROJECT-level unknown fields are NOT rejected: neither a top-level field nor one inside [mcp_servers.<name>] in .codex/config.toml stopped exec (exit 0, model answered, twice observed). The strict gate does not cover project config on this version.",
+  "note": "Unknown-field rejection is proven at the loader for user config only. Do not cite this check as adapter-level rejection of project config."
+}

@@ -1,0 +1,5 @@
+{
+  "id": "expect-manifest-complete",
+  "artifact": "agent/harness-specs/loom-manifest.txt",
+  "required_entries": [".codex/config.toml", "opencode.json", ".devin/mcp_config.json", ".devin/config.json", ".devin/hooks.v1.json", "agent/harness-specs/GAPS.md"]
+}

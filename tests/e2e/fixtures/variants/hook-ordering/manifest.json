@@ -1,0 +1,9 @@
+{
+  "name": "hook-ordering",
+  "description": "PreToolUse hooks in swapped order: the Devin adapter must preserve the declared order exactly.",
+  "changes": ["swaps the two PreToolUse hook commands; drops the Stop hook and extra permissions"],
+  "expected_generation": "success",
+  "expected_reason_pattern": "",
+  "expected_hook_order": ["$CLAUDE_PROJECT_DIR/hooks/pre-write-check.sh", "$CLAUDE_PROJECT_DIR/hooks/pre-write.sh"],
+  "loom_config_patch": null
+}

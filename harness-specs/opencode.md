@@ -1,6 +1,7 @@
 ---
 harness: opencode
-generated: 2026-09-03
+harness_version: 1.18.29
+generated: 2026-09-06
 status: seeded from live conformance probes + upstream docs; re-verify on next Phase A run
 ---
 
@@ -34,3 +35,4 @@ status: seeded from live conformance probes + upstream docs; re-verify on next P
   keys — `_generated_by` made the harness fail to parse the file (found by
   live probe, 2026-09-03). `loom --check` drift gate is the marker here.
 - `$schema` key is required and first.
+- All permissions entries (allow, deny, ask, defaultMode) are GAPS rows.

@@ -1,0 +1,11 @@
+{
+  "id": "expect-opencode-mcp-present",
+  "artifact": "opencode.json",
+  "required_content": [
+    {"pointer": "/mcp/docs-a/url", "value": "{{MCP_URL_A}}"},
+    {"pointer": "/mcp/docs-b/url", "value": "{{MCP_URL_B}}"},
+    {"pointer": "/mcp/docs-local/url", "value": "stdio://docs-local"}
+  ],
+  "forbidden_content": ["{{MCP_HTTP_URL_A}}", "{{MCP_HTTP_URL_B}}", "evil.example"],
+  "official_schema": "schemas/opencode.config.schema.json"
+}

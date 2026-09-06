@@ -1,0 +1,7 @@
+{
+  "id": "expect-opencode-unknown-field-rejected",
+  "artifact": "opencode.json",
+  "mechanism": "official-schema validation",
+  "probe": "copy the adapter, inject an unknown top-level field, validate against the vendored official schema, and require failure",
+  "note": "opencode.json carries no marker comment (the schema rejects unknown keys), so the drift gate is the marker."
+}

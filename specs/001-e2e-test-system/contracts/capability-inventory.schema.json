@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loom.local/e2e/capability-inventory.schema.json",
+  "title": "Loom capability inventory (the oracle)",
+  "type": "object",
+  "required": [
+    "inventory_version",
+    "claude_code_version",
+    "capabilities"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "inventory_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "claude_code_version": {
+      "type": "string"
+    },
+    "generated_by": {
+      "const": "hand-authored",
+      "description": "the inventory is never derived from Loom output"
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "source",
+        "intent",
+        "expectations",
+        "scenarios",
+        "evidence_required"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$"
+        },
+        "kind": {
+          "enum": [
+            "mcp",
+            "permission",
+            "hook",
+            "context",
+            "skill",
+            "agent",
+            "rule",
+            "policy"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "pointer": {
+              "type": "string"
+            }
+          }
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expectations": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/disposition"
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_required": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "official-schema",
+              "harness-loader-probe",
+              "behaviour-probe",
+              "local-structural"
+            ]
+          }
+        }
+      }
+    },
+    "disposition": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "preserved",
+            "compensated",
+            "approved-gap",
+            "unverified"
+          ]
+        },
+        "gap_id": {
+          "type": "string"
+        },
+        "artifact": {
+          "type": "string",
+          "description": "where the preserved capability must appear"
+        },
+        "assertion": {
+          "type": "string",
+          "description": "id of the expectation that must hold"
+        },
+        "native_equivalent": {
+          "type": "object",
+          "required": [
+            "exists"
+          ],
+          "properties": {
+            "exists": {
+              "type": "boolean"
+            },
+            "evidence": {
+              "type": "string"
+            }
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "approved-gap"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "gap_id",
+              "native_equivalent"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "preserved"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "artifact",
+              "assertion"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

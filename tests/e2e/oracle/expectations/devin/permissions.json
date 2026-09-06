@@ -1,0 +1,8 @@
+{
+  "id": "expect-devin-mcp-permissions",
+  "artifact": ".devin/config.json",
+  "required_content": [
+    {"pointer": "/permissions/allow", "contains_all": ["mcp__docs-a__*", "mcp__docs-b__*", "mcp__docs-local__*"]}
+  ],
+  "forbidden_content": ["Bash(make lint)", "rm -rf", ".env", "git push"]
+}
