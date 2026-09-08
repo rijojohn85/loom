@@ -15,11 +15,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # ubuntu-24.04 restricts unprivileged user namespaces, which unshare -n
+      # needs for the offline.no-network check (bwrap is absent on the runner).
+      - name: Permit unprivileged user namespaces for the no-network check
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
       - name: Install pinned harness CLIs (no credentials needed)
         run: |
           npm install -g @anthropic-ai/claude-code@2.1.263
           npm install -g @openai/codex@0.153.4
           curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.29
+          # The installer registers /home/runner/.opencode/bin in $GITHUB_PATH,
+          # which only affects LATER steps — export it for this step too.
+          export PATH="$HOME/.opencode/bin:$PATH"
           claude --version && codex --version && opencode --version
       - name: Bootstrap schema validator (only network step)
         run: tests/e2e/run.sh --bootstrap

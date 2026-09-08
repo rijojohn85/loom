@@ -22,6 +22,8 @@ jobs:
           npm install -g @anthropic-ai/claude-code
           npm install -g @openai/codex
           curl -fsSL https://opencode.ai/install | bash
+          # Same-step PATH export (GITHUB_PATH applies only to later steps).
+          export PATH="$HOME/.opencode/bin:$PATH"
           claude --version; codex --version; opencode --version || true
       - name: Bootstrap schema validator
         continue-on-error: true
