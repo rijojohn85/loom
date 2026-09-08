@@ -1,0 +1,14 @@
+{
+  "name": "transport-override",
+  "description": "docs-b is routed through a pinned stdio bridge in the Devin adapter via mcp_overrides.devin.",
+  "changes": ["no fixture file changes; the runner applies a Devin bridge override for docs-b"],
+  "expected_generation": "success",
+  "expected_reason_pattern": "",
+  "loom_config_patch": {
+    "mcp_overrides": {
+      "devin": {
+        "docs-b": {"command": "npx", "args": ["-y", "mcp-remote@0.8.3", "{{url}}"]}
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 ---
 harness: codex
-generated: 2026-09-03
+harness_version: 0.153.4
+generated: 2026-09-06
 status: seeded from live conformance probes + upstream docs; re-verify on next Phase A run
 ---
 
@@ -32,3 +33,7 @@ status: seeded from live conformance probes + upstream docs; re-verify on next P
 
 - Comment header allowed (TOML has comments)
 - Every IR hook event is a GAPS row
+- Every permissions entry (allow, deny, ask, defaultMode) is a GAPS row —
+  the approval mode is the only permission surface
+- Server names are written as quoted, TOML-escaped table keys
+  (`[mcp_servers."name"]`) so odd characters cannot corrupt the file

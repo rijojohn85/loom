@@ -1,0 +1,13 @@
+{
+  "id": "hook-order",
+  "capability_ids": ["hook.pre.write-order", "hook.post.write", "rule.hook-matcher-scope"],
+  "kind": "deterministic-probe",
+  "baseline": {"harness": "claude", "expected": "a file write appends pre-write, pre-write-check, post-write to hooks/audit.log in order, with no Bash audit entry for the write itself"},
+  "targets": {
+    "codex": {"expected": "approved-gap — no hook mechanism (gap.codex.hooks-pre)"},
+    "opencode": {"expected": "approved-gap — no hook mechanism (gap.opencode.hooks-pre)"},
+    "devin": {"expected": "unverified — deferred target"}
+  },
+  "forbidden_side_effects": ["modification of canonical fixture files beyond the scenario file"],
+  "trials": {"count": 1, "threshold": 1}
+}

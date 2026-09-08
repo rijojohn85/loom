@@ -1,5 +1,6 @@
 ---
 harness: claude
+harness_version: 2.1.263
 generated: 2026-09-03
 status: seeded from live conformance probes + upstream docs; re-verify on next Phase A run
 ---

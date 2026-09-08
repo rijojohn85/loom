@@ -1,0 +1,10 @@
+Verify the harness adapters are current without changing anything.
+
+The adapters in this project should already be up to date. Follow the loom
+skill workflow (.claude/skills/loom/SKILL.md) to verify with
+agent/tools/loom.sh --check and confirm the result.
+
+Rules:
+- Do not modify any file. Verification only.
+- Report the check's exact output.
+- Keep the response short.

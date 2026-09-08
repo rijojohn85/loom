@@ -1,0 +1,8 @@
+{
+  "name": "negative-unapproved-endpoint",
+  "description": "Approved name reused for a different endpoint: generation must refuse the mismatch.",
+  "changes": ["points docs-a at https://a.example/other instead of the allowlisted endpoint"],
+  "expected_generation": "refuse",
+  "expected_reason_pattern": "does not match approved endpoint",
+  "loom_config_patch": null
+}

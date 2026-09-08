@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "docs-local": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-u", "tests/e2e/fixtures/services/mcp_stdio.py"],
+      "url": "stdio://docs-local"
+    }
+  }
+}

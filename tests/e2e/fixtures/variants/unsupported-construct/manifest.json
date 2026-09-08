@@ -1,0 +1,8 @@
+{
+  "name": "unsupported-construct",
+  "description": "mcpServers as a list instead of an object: loom must refuse loudly, never emit a partial adapter.",
+  "changes": ["replaces the mcpServers object with a list"],
+  "expected_generation": "refuse",
+  "expected_reason_pattern": "no mcpServers object",
+  "loom_config_patch": null
+}

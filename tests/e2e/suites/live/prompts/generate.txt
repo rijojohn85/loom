@@ -1,0 +1,14 @@
+Use the loom skill to generate the missing harness adapters.
+
+You are in a project with the loom skill installed at
+.claude/skills/loom/SKILL.md. The harness adapters have NOT been generated
+yet. Follow that skill's workflow and run exactly this command now:
+
+agent/tools/loom.sh
+
+Rules:
+- Run the installed generator with the exact command above. Never edit a
+  generated adapter by hand.
+- Report the generator's exact output line ("loom: emitted ...") and the
+  files you changed.
+- Keep the response short.

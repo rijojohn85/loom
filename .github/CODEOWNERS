@@ -1,0 +1,6 @@
+# CODEOWNERS for the e2e oracle: changes here redefine what "correct"
+# means, so they need explicit human review — never by the process whose
+# output they validate (Constitution IV; tests/e2e/README.md § Oracle-change
+# review convention).
+tests/e2e/oracle/ @rijojohn
+specs/ @rijojohn

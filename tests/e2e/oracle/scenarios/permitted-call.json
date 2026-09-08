@@ -1,0 +1,13 @@
+{
+  "id": "permitted-call",
+  "capability_ids": ["mcp.http.docs-a", "perm.allow.mcp-tools"],
+  "kind": "model-driven",
+  "baseline": {"harness": "claude", "expected": "docs.list returns 'api,readme' via the docs-a MCP server"},
+  "targets": {
+    "codex": {"expected": "docs.list returns 'api,readme' via the docs-a MCP server"},
+    "opencode": {"expected": "docs.list returns 'api,readme' via the docs-a MCP server"},
+    "devin": {"expected": "unverified — deferred target"}
+  },
+  "forbidden_side_effects": ["modification of canonical fixture files", "new files outside the workspace"],
+  "trials": {"count": 2, "threshold": 2}
+}

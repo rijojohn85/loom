@@ -9,6 +9,7 @@
     "mcp_allowlist": "",
     "spec_packs": "",
     "gaps_file": "",
+    "manifest": "",
     "loom_script": "",
     "loom_config": ""
   },
@@ -17,6 +18,7 @@
     "mcp_allowlist": "Optional markdown file with a '## Approved servers' table (name | endpoint | ...). When set, loom refuses to run if any canonical server or endpoint is not in it.",
     "spec_packs": "Optional directory of dated spec packs (harness-specs/). Enables the staleness warning and defaults gaps_file to <spec_packs>/GAPS.md.",
     "gaps_file": "Where the generated capability-gap ledger goes. Empty and no spec_packs: gaps are printed to stderr instead.",
+    "manifest": "Optional file where loom records the list of emitted files; --check uses it to flag generated files that regeneration no longer produces (orphans). Empty: disabled. install.sh pre-fills it to <specs-dir>/loom-manifest.txt.",
     "loom_script": "How generated headers refer to the script, e.g. 'agent/tools/loom.sh'. Defaults to the script's path relative to repo_root.",
     "loom_config": "How generated headers refer to this file. Defaults to its path relative to repo_root."
   },

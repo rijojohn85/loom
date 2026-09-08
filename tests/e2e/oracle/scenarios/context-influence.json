@@ -1,0 +1,13 @@
+{
+  "id": "context-influence",
+  "capability_ids": ["context.claude-import", "context.agents-relationships"],
+  "kind": "model-driven",
+  "baseline": {"harness": "claude", "expected": "the deny rule is quoted from auto-loaded project context without an explicit read"},
+  "targets": {
+    "codex": {"expected": "codex debug prompt-input contains the AGENTS.md rule text (deterministic, no model spend)"},
+    "opencode": {"expected": "project context influences the answer (model-observed when credentialed)"},
+    "devin": {"expected": "unverified — deferred target"}
+  },
+  "forbidden_side_effects": ["modification of canonical fixture files"],
+  "trials": {"count": 2, "threshold": 2}
+}

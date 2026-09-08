@@ -1,0 +1,12 @@
+{
+  "schemas": [
+    {
+      "harness": "opencode",
+      "url": "https://opencode.ai/config.json",
+      "version": "1.18.29",
+      "retrieved_on": "2026-09-06",
+      "sha256": "e8cb6e287a3852ee3403f4803be5ad6b19db94948037eaa9672125c333427922",
+      "local_path": "schemas/opencode.config.schema.json"
+    }
+  ]
+}

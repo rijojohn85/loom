@@ -1,0 +1,11 @@
+{
+  "id": "expect-codex-mcp-present",
+  "artifact": ".codex/config.toml",
+  "required_content": [
+    {"server": "docs-a", "url": "{{MCP_URL_A}}"},
+    {"server": "docs-b", "url": "{{MCP_URL_B}}"},
+    {"server": "docs-local", "url": "stdio://docs-local"}
+  ],
+  "forbidden_content": ["{{MCP_HTTP_URL_A}}", "{{MCP_HTTP_URL_B}}", "evil.example"],
+  "note": "{{MCP_URL_A}} and {{MCP_URL_B}} resolve from resolved-input.json at validation time; forbidden entries prove templating completed and no unapproved endpoint leaked in."
+}

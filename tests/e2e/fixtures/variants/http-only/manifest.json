@@ -1,0 +1,8 @@
+{
+  "name": "http-only",
+  "description": "Base fixture minus the stdio server: both HTTP servers only.",
+  "changes": ["removes docs-local (stdio) from .mcp.json and the allowlist"],
+  "expected_generation": "success",
+  "expected_reason_pattern": "",
+  "loom_config_patch": null
+}

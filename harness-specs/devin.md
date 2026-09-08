@@ -1,6 +1,7 @@
 ---
 harness: devin
-generated: 2026-09-03
+harness_version: null  # deferred — no local CLI; adapters validated structurally offline
+generated: 2026-09-06
 status: seeded from live conformance probes + upstream docs; re-verify on next Phase A run
 ---
 
@@ -39,4 +40,12 @@ status: seeded from live conformance probes + upstream docs; re-verify on next P
 ## Emitter notes
 
 - JSON files get the `"_generated_by"` first key (no comment syntax)
-- Non-MCP permission entries are GAPS rows (manual CLI approval)
+- Non-MCP allow entries plus deny, ask and defaultMode are GAPS rows
+  (manual CLI approval)
+- Hook translation carries **every** command in a matcher group (each as its
+  own command entry, 30s timeout) and rewrites `$CLAUDE_PROJECT_DIR` to
+  `$DEVIN_PROJECT_DIR` at **every** occurrence
+- Supported hook events: PreToolUse, PostToolUse, PermissionRequest,
+  UserPromptSubmit, Stop, PostCompaction, SessionStart, SessionEnd
+  (PreToolUse denies on exit 2, like Claude Code); any other event is a
+  GAPS row

@@ -28,7 +28,9 @@ Three properties make it safe to rely on:
   network. It is a jq-and-bash program you can read in ten minutes.
 - **Drift-gated.** `loom.sh --check` regenerates into a temp dir and diffs
   against what is committed. Put it in your lint target and a hand-edited
-  adapter turns CI red.
+  adapter turns CI red. With `paths.manifest` configured (install.sh sets
+  it up), the check also flags generated files that regeneration no longer
+  produces — an orphaned adapter cannot linger unnoticed.
 - **Loud about loss.** Anything the canonical config says that a harness
   cannot represent (Codex has no hooks, opencode has no per-tool allowlist)
   is written to `GAPS.md` with the compensating control, so the gap is a
@@ -148,7 +150,9 @@ harness or as a default.
 
 **Apply or check.** In apply mode the files are copied into the repo. In
 check mode they are diffed against the committed copies; any difference,
-or a generated file that was never committed, fails the run.
+or a generated file that was never committed, fails the run. If
+`paths.manifest` is set, loom also writes the list of emitted files there
+and the check flags committed entries that regeneration no longer produces.
 
 Spec packs are not read at runtime. They are the dated, sourced evidence
 for what each emitter hardcodes, and loom warns when one is older than
@@ -203,11 +207,42 @@ fixture repo and checks generation, the drift gate, the allowlist gate,
 the hook translation, the gaps ledger, the staleness warning, and that
 re-installing preserves config.
 
+## Testing
+
+Beyond smoke, `tests/e2e/run.sh` is the layered end-to-end system (design:
+`specs/001-e2e-test-system/`, run guide: `tests/e2e/README.md`):
+
+- `offline` (default) — deterministic verdict over a fresh isolated
+  workspace: smoke, artifact inventory, official-schema validation,
+  idempotence, portability, drift, negative variants, capability
+  classification and a claim-kind audit. No network, no model, under
+  3 minutes. This layer gates every change.
+- `mutation` — proves every offline validator fails on a planted defect
+  for the declared reason. A green offline run means something because
+  this suite goes red on demand.
+- `live` (opt-in, costs money) — installs loom and invokes the installed
+  skill through real Claude Code, proving discovery and invocation from
+  transcripts plus the fixture's own hook audit log.
+- `conformance` — Codex and opencode demonstrably load the generated
+  adapters (loader probes, strict/schema rejection, MCP calls against
+  fixture services, trust canaries). Devin stays honestly unverified.
+- `intent` (opt-in) — observable behaviour per scenario after the Claude
+  baseline: permitted calls work, forbidden/protected/approval actions are
+  refused with no side effect, hooks fire in order, context influences the
+  task. A forbidden side effect fails permanently.
+
+`tests/e2e/run.sh --full` runs every suite against every required harness.
+Results distinguish `passed`, `failed`, `approved-gap`, `skipped` and
+`blocked`; missing tooling or credentials block instead of passing, and an
+offline-only run never prints a full end-to-end verdict.
+
 ## Limits worth knowing
 
 - Loom translates project-scoped config only. It cannot remove an MCP
   server a developer added at user scope in their own harness; that needs
   org-managed settings or network egress rules.
+- Loom supports url-based (HTTP) MCP servers only. A `command`/stdio entry
+  in `.mcp.json` is refused with an error rather than mis-emitted.
 - The Devin hook translation assumes Devin's edit tools expose the same
   `tool_input.file_path` field as Claude Code. If they do not, a path-based
   hook is inert there rather than wrongly blocking.

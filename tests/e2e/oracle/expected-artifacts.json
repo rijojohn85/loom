@@ -1,0 +1,25 @@
+{
+  "artifacts": [
+    {"path": ".codex/config.toml", "producer": "emit_codex", "format": "toml",
+     "required": true, "assertions": ["expect-codex-mcp-present"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]},
+    {"path": "opencode.json", "producer": "emit_opencode", "format": "json",
+     "required": true, "assertions": ["expect-opencode-mcp-present"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]},
+    {"path": ".devin/mcp_config.json", "producer": "emit_devin", "format": "json",
+     "required": true, "assertions": ["expect-devin-mcp-present"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]},
+    {"path": ".devin/config.json", "producer": "emit_devin", "format": "json",
+     "required": true, "assertions": ["expect-devin-mcp-permissions"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]},
+    {"path": ".devin/hooks.v1.json", "producer": "emit_devin", "format": "json",
+     "required": true, "assertions": ["expect-devin-hooks-present"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]},
+    {"path": "agent/harness-specs/GAPS.md", "producer": "loom-core", "format": "markdown",
+     "required": true, "assertions": ["expect-gaps-ledger"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]},
+    {"path": "agent/harness-specs/loom-manifest.txt", "producer": "loom-core", "format": "text",
+     "required": true, "assertions": ["expect-manifest-complete"],
+     "variants": ["base", "http-only", "stdio-only", "transport-override", "hook-ordering", "paths-with-spaces-and-escaping", "empty-configuration"]}
+  ]
+}

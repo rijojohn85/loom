@@ -1,0 +1,8 @@
+{
+  "name": "negative-url-less",
+  "description": "URL-less MCP entry with the allowlist active: generation must refuse naming the server.",
+  "changes": ["adds docs-nourl (stdio, no url) alongside docs-a"],
+  "expected_generation": "refuse",
+  "expected_reason_pattern": "docs-nourl.*no url|no url.*docs-nourl",
+  "loom_config_patch": null
+}

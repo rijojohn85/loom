@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loom.local/e2e/mutation-registry.schema.json",
+  "title": "Loom E2E mutation registry",
+  "type": "object",
+  "required": [
+    "mutations"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "mutations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "operation",
+          "target",
+          "expected_failing_validator",
+          "expected_reason_pattern"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "weaken-deny",
+              "drop-hook",
+              "change-mcp-endpoint",
+              "omit-artifact",
+              "corrupt-schema-field",
+              "hand-edit-artifact",
+              "delete-artifact",
+              "orphan-artifact",
+              "weaken-expectation",
+              "unapproved-mcp-name",
+              "invalid-source-input"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "scenario_id": {
+                "type": "string"
+              },
+              "harness": {
+                "type": "string"
+              }
+            }
+          },
+          "expected_failing_validator": {
+            "type": "string"
+          },
+          "expected_reason_pattern": {
+            "type": "string",
+            "description": "regex the recorded failure reason must match; a failure for another reason is itself a failure"
+          },
+          "expected_state": {
+            "enum": [
+              "failed",
+              "blocked"
+            ],
+            "default": "failed"
+          }
+        }
+      }
+    }
+  }
+}

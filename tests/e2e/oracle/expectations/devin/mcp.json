@@ -1,0 +1,10 @@
+{
+  "id": "expect-devin-mcp-present",
+  "artifact": ".devin/mcp_config.json",
+  "required_content": [
+    {"pointer": "/mcpServers/docs-a/url", "value": "{{MCP_URL_A}}"},
+    {"pointer": "/mcpServers/docs-b/url", "value": "{{MCP_URL_B}}"},
+    {"pointer": "/mcpServers/docs-local/url", "value": "stdio://docs-local"}
+  ],
+  "forbidden_content": ["{{MCP_HTTP_URL_A}}", "{{MCP_HTTP_URL_B}}", "evil.example"]
+}

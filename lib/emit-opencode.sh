@@ -21,7 +21,9 @@
 # Emits opencode.json with one `mcp.<name>` remote entry per canonical
 # server. The schema rejects unknown keys, so no "_generated_by" marker is
 # possible: the --check drift gate is the marker. opencode has no hook
-# mechanism and no config-level permission allowlist.
+# mechanism and no config-level permission config: every canonical
+# permissions entry (allow, deny, ask, defaultMode) and every hook event
+# becomes a GAPS row.
 
 emit_opencode() {
   local ir="$1" out="$2"
@@ -33,11 +35,17 @@ emit_opencode() {
        mcp: ([$ir[0].mcp[] | { (.name): { type: "remote", url: .url } }] | add // {}) }' \
     "${ir}" > "${out}/opencode.json"
 
-  local pcontrol
+  local pcontrol kind entry
   pcontrol="$(jq -r '.meta.permission_gap_control | .opencode // .default' "${ir}")"
-  while IFS= read -r entry; do
-    [[ -n "${entry}" ]] && gap_add opencode "permission allow: ${entry}" "${pcontrol}"
-  done < <(jq -r '(.permissions.allow // [])[] | select(startswith("mcp__") | not)' "${ir}")
+  while IFS=$'\t' read -r kind entry; do
+    [[ -n "${kind}" ]] && gap_add opencode "permission ${kind}: ${entry}" "${pcontrol}"
+  done < <(jq -r '
+    (.permissions // {}) as $p
+    | ([$p.allow[]? | select(startswith("mcp__") | not)] | map(["allow", .]))
+    + ([$p.deny[]?]  | map(["deny", .]))
+    + ([$p.ask[]?]   | map(["ask", .]))
+    + (if ($p.defaultMode // null) == null then [] else [["defaultMode", $p.defaultMode]] end)
+    | .[] | @tsv' "${ir}")
 
   local hcontrol
   hcontrol="$(jq -r '.meta.hook_gap_control | .opencode // .default' "${ir}")"

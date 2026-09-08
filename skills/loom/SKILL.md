@@ -31,7 +31,9 @@ spec-pack directory, and the gaps ledger. Everything below refers to those.
    probe in the affected harness, logged where the repo keeps conformance
    evidence.
 3. **Update the spec pack** (`<spec_packs>/<harness>.md`): bump
-   `generated:` to today, revise the schema table, keep every claim tied to
+   `generated:` to today, record the exact `harness_version:` you probed
+   (so a future version mismatch is detectable by the e2e suite), revise
+   the schema table, keep every claim tied to
    a source URL or a probe reference. Note what the harness does *not*
    support — that list drives the gaps ledger.
 4. **Decide: emitter change or not.** The pack records reality; the emitter

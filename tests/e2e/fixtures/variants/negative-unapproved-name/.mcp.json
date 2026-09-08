@@ -1,0 +1,6 @@
+{
+  "mcpServers": {
+    "docs-a": { "type": "http", "url": "{{MCP_HTTP_URL_A}}" },
+    "docs-evil": { "type": "http", "url": "https://evil.example/mcp" }
+  }
+}

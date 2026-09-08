@@ -1,0 +1,50 @@
+name: e2e-offline
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # ubuntu-24.04 restricts unprivileged user namespaces, which unshare -n
+      # needs for the offline.no-network check (bwrap is absent on the runner).
+      - name: Permit unprivileged user namespaces for the no-network check
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - name: Install pinned harness CLIs (no credentials needed)
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.263
+          npm install -g @openai/codex@0.153.4
+          curl -fsSL https://opencode.ai/install | bash -s -- --version 1.18.29
+          # The installer registers /home/runner/.opencode/bin in $GITHUB_PATH,
+          # which only affects LATER steps — export it for this step too.
+          export PATH="$HOME/.opencode/bin:$PATH"
+          claude --version && codex --version && opencode --version
+      - name: Bootstrap schema validator (only network step)
+        run: tests/e2e/run.sh --bootstrap
+      - name: Offline gate + mutation self-verification (pinned, credential-free)
+        run: tests/e2e/run.sh --suite offline --variant all --suite mutation
+      - name: Concurrency check — two simultaneous offline runs (SC-011)
+        run: |
+          tests/e2e/run.sh --suite offline --clean > /tmp/conc-a.log 2>&1 &
+          A=$!
+          tests/e2e/run.sh --suite offline --clean > /tmp/conc-b.log 2>&1 &
+          B=$!
+          wait $A; RA=$?
+          wait $B; RB=$?
+          tail -3 /tmp/conc-a.log; tail -3 /tmp/conc-b.log
+          exit $(( RA | RB ))
+      - name: Upload results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-offline-results
+          path: tests/e2e/results/

@@ -1,0 +1,12 @@
+{
+  "id": "expect-devin-hooks-present",
+  "artifact": ".devin/hooks.v1.json",
+  "required_content": [
+    {"pointer": "/PreToolUse/0/hooks/0/command", "value": "$DEVIN_PROJECT_DIR/hooks/pre-write.sh"},
+    {"pointer": "/PreToolUse/0/hooks/1/command", "value": "$DEVIN_PROJECT_DIR/hooks/pre-write-check.sh"},
+    {"pointer": "/PostToolUse/0/hooks/0/command", "value": "$DEVIN_PROJECT_DIR/hooks/post-write.sh"},
+    {"pointer": "/Stop/0/hooks/0/command", "value": "$DEVIN_PROJECT_DIR/hooks/on-stop.sh"}
+  ],
+  "forbidden_content": ["$CLAUDE_PROJECT_DIR"],
+  "order_assertion": "expect-devin-hooks-order"
+}

@@ -1,0 +1,642 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loom.local/e2e/results.schema.json",
+  "title": "Loom E2E run result",
+  "type": "object",
+  "required": [
+    "run_id",
+    "started_at",
+    "finished_at",
+    "mode",
+    "inventory_version",
+    "suites_selected",
+    "harnesses_selected",
+    "pins",
+    "checks",
+    "capabilities",
+    "summary",
+    "verdict"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": [
+        "offline",
+        "selected",
+        "full"
+      ]
+    },
+    "inventory_version": {
+      "type": "string"
+    },
+    "suites_selected": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "offline",
+          "mutation",
+          "live",
+          "conformance",
+          "intent"
+        ]
+      },
+      "minItems": 1
+    },
+    "harnesses_selected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workspace": {
+      "type": "string",
+      "description": "run-relative path to workspace.json"
+    },
+    "pins": {
+      "type": "object",
+      "required": [
+        "source_revision",
+        "worktree_digest",
+        "fixture_revision",
+        "harnesses",
+        "dependencies",
+        "schemas"
+      ],
+      "properties": {
+        "source_revision": {
+          "type": "string"
+        },
+        "worktree_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "fixture_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "harnesses": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "version_pinned",
+              "version_observed",
+              "pinned_match"
+            ],
+            "properties": {
+              "version_pinned": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "version_observed": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pinned_match": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "harness",
+              "url",
+              "version",
+              "retrieved_on",
+              "sha256",
+              "local_path"
+            ],
+            "properties": {
+              "harness": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "retrieved_on": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "local_path": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capabilityOutcome"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "checks",
+        "capabilities",
+        "mandatory_not_run"
+      ],
+      "properties": {
+        "checks": {
+          "type": "object",
+          "required": [
+            "passed",
+            "failed",
+            "approved_gap",
+            "skipped",
+            "blocked"
+          ],
+          "properties": {
+            "passed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "approved_gap": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "skipped": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "blocked": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "capabilities": {
+          "type": "object",
+          "required": [
+            "preserved",
+            "verified_compensated",
+            "approved_gap",
+            "failed",
+            "unverified"
+          ],
+          "properties": {
+            "preserved": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "verified_compensated": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "approved_gap": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unverified": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "mandatory_not_run": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ids of mandatory checks that ended blocked or skipped; non-empty forbids a pass verdict"
+        },
+        "consumption": {
+          "$ref": "#/$defs/consumption"
+        }
+      }
+    },
+    "verdict": {
+      "enum": [
+        "full-e2e-pass",
+        "offline-pass",
+        "partial",
+        "failed",
+        "blocked",
+        "oracle-integrity-failure"
+      ]
+    },
+    "verdict_note": {
+      "type": "string",
+      "description": "Human sentence naming what was and was not covered; required for every verdict other than full-e2e-pass"
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "required": [
+        "id",
+        "suite",
+        "mandatory",
+        "state",
+        "claim_kind",
+        "pinned",
+        "attempts",
+        "evidence",
+        "duration_ms"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "suite": {
+          "enum": [
+            "offline",
+            "mutation",
+            "live",
+            "conformance",
+            "intent"
+          ]
+        },
+        "mandatory": {
+          "type": "boolean"
+        },
+        "state": {
+          "enum": [
+            "passed",
+            "failed",
+            "approved-gap",
+            "skipped",
+            "blocked"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "claim_kind": {
+          "enum": [
+            "official-schema",
+            "harness-loader-probe",
+            "behaviour-probe",
+            "local-structural",
+            "none"
+          ]
+        },
+        "harness": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "harness_version_observed": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interface": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "exact command or API used to obtain the evidence"
+        },
+        "pinned": {
+          "type": "boolean",
+          "description": "false marks an advisory result that must not be cited as gate evidence"
+        },
+        "capability_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gap_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mutation_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attempts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "n",
+              "state"
+            ],
+            "properties": {
+              "n": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "state": {
+                "enum": [
+                  "passed",
+                  "failed",
+                  "approved-gap",
+                  "skipped",
+                  "blocked"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "consumption": {
+                "$ref": "#/$defs/consumption"
+              }
+            }
+          }
+        },
+        "forbidden_side_effect_observed": {
+          "type": "boolean",
+          "default": false
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "consumption": {
+          "$ref": "#/$defs/consumption"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "passed"
+              }
+            }
+          },
+          "then": {},
+          "else": {
+            "required": [
+              "reason"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "approved-gap"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "gap_id"
+            ],
+            "properties": {
+              "gap_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "suite": {
+                "const": "mutation"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "mutation_id"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "pinned": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "claim_kind": {
+                "enum": [
+                  "behaviour-probe",
+                  "local-structural",
+                  "none"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "capabilityOutcome": {
+      "type": "object",
+      "required": [
+        "capability_id",
+        "harness",
+        "state",
+        "evidence",
+        "checks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "capability_id": {
+          "type": "string"
+        },
+        "harness": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "preserved",
+            "verified-compensated",
+            "approved-gap",
+            "failed",
+            "unverified"
+          ]
+        },
+        "gap_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "native_equivalent": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "exists": {
+              "type": "boolean"
+            },
+            "evidence": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exists"
+          ]
+        },
+        "compensating_control_verified_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "check id that demonstrated the control operating; required for verified-compensated"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "approved-gap"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "gap_id",
+              "native_equivalent"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "verified-compensated"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "compensating_control_verified_by"
+            ],
+            "properties": {
+              "compensating_control_verified_by": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "consumption": {
+      "type": "object",
+      "properties": {
+        "elapsed_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "cost_usd": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ceiling": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "null means the operator set no ceiling (the default)"
+        }
+      }
+    }
+  }
+}

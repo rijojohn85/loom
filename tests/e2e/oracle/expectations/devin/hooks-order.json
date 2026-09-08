@@ -1,0 +1,6 @@
+{
+  "id": "expect-devin-hooks-order",
+  "artifact": ".devin/hooks.v1.json",
+  "note": "PreToolUse hook commands must appear in canonical declaration order (rewritten to $DEVIN_PROJECT_DIR).",
+  "ordered_commands": ["$DEVIN_PROJECT_DIR/hooks/pre-write.sh", "$DEVIN_PROJECT_DIR/hooks/pre-write-check.sh"]
+}

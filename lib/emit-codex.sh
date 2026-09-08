@@ -18,9 +18,10 @@
 # Codex emitter (loom registry — see ../loom.sh header).
 # Spec pack: harness-specs/codex.md
 #
-# Emits .codex/config.toml: one [mcp_servers.<name>] table per canonical
+# Emits .codex/config.toml: one [mcp_servers."name"] table per canonical
 # server with tool calls pre-approved. Codex has no hook mechanism and no
-# per-tool permission allowlist; every hook event becomes a GAPS row.
+# per-tool permission config of any kind: every canonical permissions entry
+# (allow, deny, ask, defaultMode) and every hook event becomes a GAPS row.
 
 emit_codex() {
   local ir="$1" out="$2"
@@ -42,9 +43,26 @@ emit_codex() {
     [[ -n "${allowlist}" ]] && echo "# MCP server allowlist source of truth: ${allowlist}"
     [[ -n "${note}" ]] && printf '%s\n' "${note}" | sed 's/^/# /'
     echo
-    jq -r '.mcp[] |
-      "[mcp_servers.\(.name)]\nurl = \"\(.url)\"\ndefault_tools_approval_mode = \"auto\"\n"' "${ir}"
+    # Table keys are quoted and both values TOML-escaped, so names/URLs with
+    # quotes or backslashes cannot corrupt the file.
+    jq -r '
+      def e: gsub("\\\\"; "\\\\") | gsub("\""; "\\\"") | gsub("\n"; "\\n") | gsub("\r"; "\\r") | gsub("\t"; "\\t");
+      .mcp[] |
+      "[mcp_servers.\"\(.name | e)\"]\nurl = \"\(.url | e)\"\ndefault_tools_approval_mode = \"auto\"\n"' "${ir}"
   } > "${dir}/config.toml"
+
+  # No permission mechanism exists: every entry is a GAPS row.
+  local pcontrol kind entry
+  pcontrol="$(jq -r '.meta.permission_gap_control | .codex // .default' "${ir}")"
+  while IFS=$'\t' read -r kind entry; do
+    [[ -n "${kind}" ]] && gap_add codex "permission ${kind}: ${entry}" "${pcontrol}"
+  done < <(jq -r '
+    (.permissions // {}) as $p
+    | ([$p.allow[]?] | map(["allow", .]))
+    + ([$p.deny[]?]  | map(["deny", .]))
+    + ([$p.ask[]?]   | map(["ask", .]))
+    + (if ($p.defaultMode // null) == null then [] else [["defaultMode", $p.defaultMode]] end)
+    | .[] | @tsv' "${ir}")
 
   local control
   control="$(jq -r '.meta.hook_gap_control | .codex // .default' "${ir}")"

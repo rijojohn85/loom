@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make lint)",
+      "mcp__docs-a__*",
+      "mcp__docs-b__*",
+      "mcp__docs-local__*"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Read(./.env)"
+    ],
+    "ask": [
+      "Bash(git push *)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/pre-write.sh" },
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/pre-write-check.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/post-write.sh" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/audit-bash.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/on-stop.sh" }
+        ]
+      }
+    ]
+  }
+}

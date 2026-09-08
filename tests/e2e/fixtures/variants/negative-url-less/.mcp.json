@@ -1,0 +1,6 @@
+{
+  "mcpServers": {
+    "docs-a": { "type": "http", "url": "{{MCP_HTTP_URL_A}}" },
+    "docs-nourl": { "type": "stdio", "command": "some-mcp" }
+  }
+}
