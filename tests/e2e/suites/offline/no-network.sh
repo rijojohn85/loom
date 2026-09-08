@@ -10,12 +10,14 @@ E2E_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # shellcheck disable=SC1091
 source "${E2E_ROOT}/lib/assert.sh"
 
-# Deny outbound access: unshare -n where the kernel allows it, else bwrap.
-# Without either, the denial cannot be enforced and the check reports blocked
-# rather than passing blind.
+# Deny outbound access: unshare -n (privileged), unshare -rn (unprivileged
+# user+net namespace), or bwrap. Without any of the three, the denial cannot
+# be enforced and the check reports blocked rather than passing blind.
 NET_DENY=""
 if unshare -n true 2>/dev/null; then
   NET_DENY="unshare -n"
+elif unshare -rn true 2>/dev/null; then
+  NET_DENY="unshare -rn"
 elif bwrap --unshare-net --bind / / true 2>/dev/null; then
   NET_DENY="bwrap --unshare-net --bind / / --dev /dev --proc /proc"
 else

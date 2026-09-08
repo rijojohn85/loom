@@ -368,8 +368,14 @@ run_case() {  # <registry-id>
       ws="$(fresh_copy phonehome)"
       printf '\npage="$(curl -m 5 -sf http://127.0.0.1:%s/mcp -d "{}" || exit 1)"\n' "${svc_port}" \
         >> "${ws}/agent/tools/lib/emit-devin.sh"
-      deny=(bwrap --unshare-net --bind / / --dev /dev --proc /proc)
-      unshare -n true 2>/dev/null && deny=(unshare -n)
+      deny=()
+      if unshare -n true 2>/dev/null; then
+        deny=(unshare -n)
+      elif unshare -rn true 2>/dev/null; then
+        deny=(unshare -rn)
+      else
+        deny=(bwrap --unshare-net --bind / / --dev /dev --proc /proc)
+      fi
       reason="$(v_nonet "${ws}" "${deny[@]}")" && fire=0 || fire=1
       rm -rf "${ws}"
       kill "${svc_pid}" 2>/dev/null || true
